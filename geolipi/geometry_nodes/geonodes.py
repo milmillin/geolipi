@@ -99,6 +99,7 @@ def create_cylinder_node_seq(node_group, h=None, r=None):
     node_seq = [draw_node, material_node]
     return node_seq
 
+
 def create_cone_node_seq(node_group, angle, h):
     """
     Creates a sequence of nodes for generating a cylinder geometry.
@@ -112,20 +113,21 @@ def create_cone_node_seq(node_group, angle, h):
         list: A list of created nodes in the sequence.
     """
     # based on height and angle find radius
-    r = h[0] * np.tan(np.pi/2 - angle[0])
+    r = h[0] * np.tan(np.pi / 2 - angle[0])
     r = (r,)
     draw_node = node_group.nodes.new(type="GeometryNodeMeshCone")
     draw_node.inputs["Depth"].default_value = h[0]
     draw_node.inputs["Radius Bottom"].default_value = r[0]
     # translate
     transform_node = node_group.nodes.new(type="GeometryNodeTransform")
-    transform_node.inputs['Translation'].default_value = (0, 0, -h[0])
+    transform_node.inputs["Translation"].default_value = (0, 0, -h[0])
     node_group.links.new(draw_node.outputs["Mesh"], transform_node.inputs["Geometry"])
 
     material_node = node_group.nodes.new(type="GeometryNodeSetMaterial")
     node_group.links.new(transform_node.outputs["Geometry"], material_node.inputs["Geometry"])
     node_seq = [draw_node, material_node]
     return node_seq
+
 
 def create_inexact_super_quadrics_node_seq(node_group, skew_vec, epsilon_1, epsilon_2):
     """
@@ -143,9 +145,9 @@ def create_inexact_super_quadrics_node_seq(node_group, skew_vec, epsilon_1, epsi
     vol_to_mesh_node = node_group.nodes.new(type="GeometryNodeVolumeToMesh")
     vol_to_mesh_node.inputs[3].default_value = 0.001
     vol_cube = node_group.nodes.new(type="GeometryNodeVolumeCube")
-    vol_cube.inputs['Resolution X'].default_value = SDF_RESOLUTION
-    vol_cube.inputs['Resolution Y'].default_value = SDF_RESOLUTION
-    vol_cube.inputs['Resolution Z'].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution X"].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution Y"].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution Z"].default_value = SDF_RESOLUTION
     # Entire maths here
     epsilon_2 = epsilon_2[0]
     epsilon_1 = epsilon_1[0]
@@ -161,8 +163,8 @@ def create_inexact_super_quadrics_node_seq(node_group, skew_vec, epsilon_1, epsi
     node_group.links.new(div_node.outputs["Vector"], sep_node.inputs[0])
     pow_node_x = node_group.nodes.new(type="ShaderNodeMath")
     pow_node_x.operation = "POWER"
-    expo_1 = 2 /(epsilon_1 + EPSILON)
-    expo_2 = 2 /(epsilon_2 + EPSILON)
+    expo_1 = 2 / (epsilon_1 + EPSILON)
+    expo_2 = 2 / (epsilon_2 + EPSILON)
     pow_node_x.inputs[1].default_value = expo_1
     node_group.links.new(sep_node.outputs["X"], pow_node_x.inputs[0])
     # Same for Y
@@ -190,7 +192,7 @@ def create_inexact_super_quadrics_node_seq(node_group, skew_vec, epsilon_1, epsi
     # take power
     pow_node = node_group.nodes.new(type="ShaderNodeMath")
     pow_node.operation = "POWER"
-    pow_node.inputs[1].default_value = (epsilon_2 / (epsilon_1 + EPSILON))
+    pow_node.inputs[1].default_value = epsilon_2 / (epsilon_1 + EPSILON)
     node_group.links.new(add_eps.outputs["Value"], pow_node.inputs[0])
     # add to z
     all_sum = node_group.nodes.new(type="ShaderNodeMath")
@@ -204,7 +206,7 @@ def create_inexact_super_quadrics_node_seq(node_group, skew_vec, epsilon_1, epsi
     # pow
     pow_all = node_group.nodes.new(type="ShaderNodeMath")
     pow_all.operation = "POWER"
-    pow_all.inputs[1].default_value = (-epsilon_1 / 2.0)
+    pow_all.inputs[1].default_value = -epsilon_1 / 2.0
     node_group.links.new(abs_all.outputs["Value"], pow_all.inputs[0])
     # greater than 1
     greater_than = node_group.nodes.new(type="ShaderNodeMath")
@@ -221,6 +223,7 @@ def create_inexact_super_quadrics_node_seq(node_group, skew_vec, epsilon_1, epsi
     node_seq = [vol_to_mesh_node, material_node]
     return node_seq
 
+
 def create_plane_node_seq(node_group, n, h):
     """
     Creates a sequence of nodes for generating a half space based on a plane normal and distance from origin.
@@ -229,7 +232,7 @@ def create_plane_node_seq(node_group, n, h):
         node_group (bpy.types.NodeTree): The node tree to which the nodes will be added.
         n (tuple): The normal vector of the plane.
         h (tuple): The distance of the plane from the origin.
-    
+
     Returns:
         list: A list of created nodes in the sequence.
     """
@@ -237,9 +240,9 @@ def create_plane_node_seq(node_group, n, h):
     vol_to_mesh_node = node_group.nodes.new(type="GeometryNodeVolumeToMesh")
     vol_to_mesh_node.inputs[3].default_value = 0.001
     vol_cube = node_group.nodes.new(type="GeometryNodeVolumeCube")
-    vol_cube.inputs['Resolution X'].default_value = SDF_RESOLUTION
-    vol_cube.inputs['Resolution Y'].default_value = SDF_RESOLUTION
-    vol_cube.inputs['Resolution Z'].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution X"].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution Y"].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution Z"].default_value = SDF_RESOLUTION
     # Maths
     # normal vector
     vector_node = node_group.nodes.new(type="ShaderNodeVectorMath")
@@ -277,7 +280,7 @@ def create_plane_node_seq(node_group, n, h):
 def create_inf_cylinder_node_seq(node_group, c):
     """
     Creates a sequence of nodes for generating an infinite cylinder geometry.
-    
+
     Parameters:
         node_group (bpy.types.NodeTree): The node tree to which the nodes will be added.
         c (tuple):  A tuple of shape [3] representing the cylinder's center and radius (last component).
@@ -289,9 +292,9 @@ def create_inf_cylinder_node_seq(node_group, c):
     vol_to_mesh_node = node_group.nodes.new(type="GeometryNodeVolumeToMesh")
     vol_to_mesh_node.inputs[3].default_value = 0.001
     vol_cube = node_group.nodes.new(type="GeometryNodeVolumeCube")
-    vol_cube.inputs['Resolution X'].default_value = SDF_RESOLUTION
-    vol_cube.inputs['Resolution Y'].default_value = SDF_RESOLUTION
-    vol_cube.inputs['Resolution Z'].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution X"].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution Y"].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution Z"].default_value = SDF_RESOLUTION
     # Maths
     position_node = node_group.nodes.new(type="GeometryNodeInputPosition")
     # sub_node
@@ -330,14 +333,15 @@ def create_inf_cylinder_node_seq(node_group, c):
     node_seq = [vol_to_mesh_node, material_node]
     return node_seq
 
+
 def create_inf_cone_node_seq(node_group, angle):
 
     vol_to_mesh_node = node_group.nodes.new(type="GeometryNodeVolumeToMesh")
     vol_to_mesh_node.inputs[3].default_value = 0.001
     vol_cube = node_group.nodes.new(type="GeometryNodeVolumeCube")
-    vol_cube.inputs['Resolution X'].default_value = SDF_RESOLUTION
-    vol_cube.inputs['Resolution Y'].default_value = SDF_RESOLUTION
-    vol_cube.inputs['Resolution Z'].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution X"].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution Y"].default_value = SDF_RESOLUTION
+    vol_cube.inputs["Resolution Z"].default_value = SDF_RESOLUTION
     # Maths
     position_node = node_group.nodes.new(type="GeometryNodeInputPosition")
     # separate XYZ
@@ -471,9 +475,7 @@ def create_prebaked_primitive_node_seq(node_group, filepath):
     info_node.inputs[0].default_value = cur_obj
 
     material_node = node_group.nodes.new(type="GeometryNodeSetMaterial")
-    node_group.links.new(
-        info_node.outputs["Geometry"], material_node.inputs["Geometry"]
-    )
+    node_group.links.new(info_node.outputs["Geometry"], material_node.inputs["Geometry"])
     node_seq = [info_node, material_node]
     return node_seq
 
@@ -546,6 +548,7 @@ def create_boolean_complement_node_seq(node_group):
 
     return node_seq
 
+
 def create_boolean_join_node_seq(node_group):
     """
     Creates a sequence of nodes for joining multiple geometries.
@@ -595,8 +598,6 @@ def create_reflect_node_seq(node_group):
     vector_math_node.operation = "REFLECT"
 
     node_group.links.new(set_position_node.outputs["Geometry"], join_node.inputs[0])
-    node_group.links.new(
-        vector_math_node.outputs["Vector"], set_position_node.inputs["Position"]
-    )
+    node_group.links.new(vector_math_node.outputs["Vector"], set_position_node.inputs["Position"])
     node_group.links.new(position_node.outputs["Position"], vector_math_node.inputs[0])
     return [join_node, set_position_node, position_node, vector_math_node]

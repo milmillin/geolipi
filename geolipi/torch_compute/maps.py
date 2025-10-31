@@ -230,7 +230,6 @@ INVERTED_MAP = {
     sym_comb.Intersection: sym_comb.Union,
     sym_comb.Difference: sym_comb.Union,
     sym_comb.Complement: sym_comb.Complement,
-        
 }
 NORMAL_MAP = {
     sym_comb.Union: sym_comb.Union,
@@ -238,9 +237,7 @@ NORMAL_MAP = {
     sym_comb.Difference: sym_comb.Intersection,
     sym_comb.Complement: sym_comb.Complement,
 }
-ONLY_SIMPLIFY_RULES = set(
-    [(sym_comb.Intersection, sym_comb.Intersection), (sym_comb.Union, sym_comb.Union)]
-)
+ONLY_SIMPLIFY_RULES = set([(sym_comb.Intersection, sym_comb.Intersection), (sym_comb.Union, sym_comb.Union)])
 ALL_RULES = set(
     [
         (sym_comb.Intersection, sym_comb.Intersection),
@@ -249,13 +246,12 @@ ALL_RULES = set(
     ]
 )
 # CNF-specific rules
-ONLY_SIMPLIFY_RULES_CNF = set([
-    (sym_comb.Intersection, sym_comb.Intersection),
-    (sym_comb.Union, sym_comb.Union)
-])
+ONLY_SIMPLIFY_RULES_CNF = set([(sym_comb.Intersection, sym_comb.Intersection), (sym_comb.Union, sym_comb.Union)])
 
-ALL_RULES_CNF = set([
-    (sym_comb.Intersection, sym_comb.Intersection),
-    (sym_comb.Union, sym_comb.Union),
-    (sym_comb.Union, sym_comb.Intersection),  # Key difference: Distribute Union over Intersection
-])
+ALL_RULES_CNF = set(
+    [
+        (sym_comb.Intersection, sym_comb.Intersection),
+        (sym_comb.Union, sym_comb.Union),
+        (sym_comb.Union, sym_comb.Intersection),  # Key difference: Distribute Union over Intersection
+    ]
+)

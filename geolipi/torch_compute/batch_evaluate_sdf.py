@@ -139,9 +139,7 @@ def batch_evaluate(expr_set: List[object], sketcher, coords=None):
         if expression is None:
             sdf = sketcher.empty_sdf()
         else:
-            sdf = _execute_compiled_expression(
-                expression, type_wise_primitives, type_wise_draw_count
-            )
+            sdf = _execute_compiled_expression(expression, type_wise_primitives, type_wise_draw_count)
         all_sdfs.append(sdf)
         draw_specs = batch_limiter[ind]
         for draw_type in type_wise_draw_count.keys():
@@ -153,9 +151,7 @@ def batch_evaluate(expr_set: List[object], sketcher, coords=None):
     return all_sdfs
 
 
-def _execute_compiled_expression(
-    expression, type_wise_primitives, type_wise_draw_count
-):
+def _execute_compiled_expression(expression, type_wise_primitives, type_wise_draw_count):
     execution_stack = []
     operator_stack = []
     operator_nargs_stack = []
@@ -179,11 +175,7 @@ def _execute_compiled_expression(
         else:
             raise ValueError(f"Unknown expression type {type(cur_expr)}")
 
-        while (
-            operator_stack
-            and len(execution_stack) - execution_pointer_index[-1]
-            >= operator_nargs_stack[-1]
-        ):
+        while operator_stack and len(execution_stack) - execution_pointer_index[-1] >= operator_nargs_stack[-1]:
             n_args = operator_nargs_stack.pop()
             operator = operator_stack.pop()
             _ = execution_pointer_index.pop()

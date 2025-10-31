@@ -2,11 +2,12 @@ import torch as th
 import numpy as np
 from .settings import Settings
 
+
 class Sketcher:
     """
     The Sketcher class provides a framework for creating and manipulating a grid
-    of coordinates in a specified number of dimensions. It supports operations 
-    such as scaling, translating, and generating homogenous coordinates. This 
+    of coordinates in a specified number of dimensions. It supports operations
+    such as scaling, translating, and generating homogenous coordinates. This
     class is designed to work with PyTorch tensors.
 
     Attributes:
@@ -24,9 +25,15 @@ class Sketcher:
 
     """
 
-    def __init__(self, device: str = "cuda", dtype: th.dtype = th.float32,
-                 resolution: int = 64, mode: str = "direct", n_dims: int = 3,
-                 coord_scale: float = 1.0):
+    def __init__(
+        self,
+        device: str = "cuda",
+        dtype: th.dtype = th.float32,
+        resolution: int = 64,
+        mode: str = "direct",
+        n_dims: int = 3,
+        coord_scale: float = 1.0,
+    ):
 
         if dtype == "float32":
             dtype = th.float32
@@ -51,7 +58,7 @@ class Sketcher:
 
     def adapt_coords(self, scale, origin=None):
         coords = self.create_coords()
-        
+
         if isinstance(scale, (int, float)):
             coords = coords * scale
         elif isinstance(scale, (tuple, list)):
@@ -59,7 +66,7 @@ class Sketcher:
                 coords[:, i] = coords[:, i] * scale[i]
         else:
             raise ValueError("Invalid scale value.")
-        
+
         if not origin is None:
             if isinstance(origin, (int, float)):
                 coords = coords + origin
@@ -68,16 +75,17 @@ class Sketcher:
                     coords[:, i] = coords[:, i] + origin[i]
             else:
                 raise ValueError("Invalid scale value.")
-            
+
         self.coords = coords
+
     def adapt_coords_from_bounds(self, min_xy, max_xy):
         scale = tuple((max_xy[i] - min_xy[i]) / 2.0 for i in range(self.n_dims))
         origin = tuple((max_xy[i] + min_xy[i]) / 2.0 for i in range(self.n_dims))
         self.adapt_coords(scale=scale, origin=origin)
-        
+
     def reset_coords(self):
         self.adapt_coords((1.0, 1.0), (0.0, 0.0))
-        
+
     def get_scale_identity(self):
         """Return an identity scale matrix."""
         return self.scale_identity.clone().detach()
@@ -94,10 +102,11 @@ class Sketcher:
         canvas = th.ones_like(self.coords[..., :1]).repeat(1, 4)
         return canvas
 
-    
     def create_bound_coords(self):
         res = self.resolution
-        mesh_grid_inp = [range(res),] * self.n_dims
+        mesh_grid_inp = [
+            range(res),
+        ] * self.n_dims
         points = np.stack(np.meshgrid(*mesh_grid_inp, indexing="ij"), axis=-1)
         points = points.astype(np.float32)
         points = (points / (res - 1) - 0.5) * 2
@@ -105,13 +114,15 @@ class Sketcher:
         points = th.from_numpy(points)
         points = th.reshape(points, (-1, self.n_dims)).to(self.device)
         return points
-    
+
     def create_centered_coords(self):
         res = self.resolution
-        mesh_grid_inp = [range(res),] * self.n_dims
+        mesh_grid_inp = [
+            range(res),
+        ] * self.n_dims
         points = np.stack(np.meshgrid(*mesh_grid_inp, indexing="ij"), axis=-1)
         points = points.astype(np.float32)
-        points = (points / res - (res-1)/(2*res)) * 2
+        points = (points / res - (res - 1) / (2 * res)) * 2
         points = points * self.coord_scale
         points = th.from_numpy(points)
         points = th.reshape(points, (-1, self.n_dims)).to(self.device)

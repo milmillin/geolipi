@@ -95,7 +95,7 @@ Examples
     "closed": {"type": "bool", "default": false}
   }
 
-- TextureSample(uv: Expr[Vector[2]], filter: Enum["nearest"|"linear"]) 
+- TextureSample(uv: Expr[Vector[2]], filter: Enum["nearest"|"linear"])
   {
     "uv": {"type": "Expr[Vector[2]]"},
     "filter": {"type": "Enum[\"nearest\"|\"linear\"]", "default": "linear"}
@@ -111,7 +111,3 @@ Examples
 
 - Tensor with symbolic shape
   { "weights": {"type": "Tensor[float, (N, 3)]"} }
-
-
-
-

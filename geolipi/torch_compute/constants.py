@@ -23,7 +23,5 @@ TAN_30 = np.tan(np.pi / 6)
 PENT_VEC = np.array([0.809016994, 0.587785252, 0.726542528], dtype=np.float32)
 HEX_VEC = np.array([-0.866025404, 0.5, 0.577350269], dtype=np.float32)
 OCT_VEC = np.array([-0.9238795325, 0.3826834323, 0.4142135623], dtype=np.float32)
-HEXAGRAM_VEC = np.array(
-    [-0.5, 0.8660254038, 0.5773502692, 1.7320508076], dtype=np.float32
-)
+HEXAGRAM_VEC = np.array([-0.5, 0.8660254038, 0.5773502692, 1.7320508076], dtype=np.float32)
 STAR_VEC = np.array([0.809016994375, -0.587785252292], dtype=np.float32)

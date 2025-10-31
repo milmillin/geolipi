@@ -39,7 +39,6 @@ PRIMITIVE_MAP = {
     gls.Plane3D: create_plane_node_seq,
     gls.InfiniteCylinder3D: create_inf_cylinder_node_seq,
     gls.InfiniteCone3D: create_inf_cone_node_seq,
-
 }
 
 MODIFIER_MAP = {

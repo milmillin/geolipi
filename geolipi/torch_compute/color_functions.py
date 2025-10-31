@@ -6,6 +6,7 @@ from .settings import Settings
 import skfmm
 import numpy as np
 
+
 # Color boolean.
 def destination_in(source: th.Tensor, destination: th.Tensor) -> th.Tensor:
     """
@@ -246,14 +247,14 @@ def modify_color(color_canvas, new_color):
     old_alpha = color_canvas[..., -1:]
     new_alpha = new_color[..., -1:]
     result_alpha = new_alpha + old_alpha * (1 - new_alpha)
-    color_canvas[..., :-1] = new_color[..., :-1] * new_alpha + color_canvas[..., :-1] * (
-        1 - new_alpha
-    )
+    color_canvas[..., :-1] = new_color[..., :-1] * new_alpha + color_canvas[..., :-1] * (1 - new_alpha)
     color_canvas[..., :-1] = color_canvas[..., :-1] / result_alpha
     return color_canvas
 
 
-def deprecated_modify_color_tritone(points: th.Tensor, mid_color: th.Tensor, black=None, white=None, mid_point: float = 0.5) -> th.Tensor:
+def deprecated_modify_color_tritone(
+    points: th.Tensor, mid_color: th.Tensor, black=None, white=None, mid_point: float = 0.5
+) -> th.Tensor:
     """
     Parameters:
         points: Input color points
@@ -277,14 +278,14 @@ def deprecated_modify_color_tritone(points: th.Tensor, mid_color: th.Tensor, bla
         white = white[..., :n]
 
     R, G, B, A = th.chunk(points, 4, dim=-1)
-    # L = (R + G+ B) / 3# 
-    L = R * 299/1000 + G * 587/1000 + B * 114/1000
+    # L = (R + G+ B) / 3#
+    L = R * 299 / 1000 + G * 587 / 1000 + B * 114 / 1000
     L = th.clamp(L, 0, 1)
     # Now using L we must give each a ratio factor
     factor_a = (L - mid_point) / (1 - mid_point)
     factor_a = th.clamp(factor_a, 0, 1)
     color_a = mid_color + (white - mid_color) * (factor_a)
-    factor_b = (L / mid_point)
+    factor_b = L / mid_point
     factor_b = th.clamp(factor_b, 0, 1)
     color_b = black + (mid_color - black) * (factor_b)
     color = th.where(L >= mid_point, color_a, color_b)
@@ -292,6 +293,7 @@ def deprecated_modify_color_tritone(points: th.Tensor, mid_color: th.Tensor, bla
         color = th.cat([color, A], dim=-1)
 
     return color
+
 
 def alpha_mask(points: th.Tensor) -> th.Tensor:
     """
@@ -303,6 +305,7 @@ def alpha_mask(points: th.Tensor) -> th.Tensor:
     """
     mask = 0.1 - points[..., -1:]
     return mask
+
 
 def unopt_alpha_to_sdf(points: th.Tensor, dx: th.Tensor, canvas_shape=None) -> th.Tensor:
     """
@@ -326,9 +329,9 @@ def unopt_alpha_to_sdf(points: th.Tensor, dx: th.Tensor, canvas_shape=None) -> t
         n = np.sqrt(P).astype(int)
         canvas_shape = (n, n)
     outputs = []
-    
+
     for i in range(B):
-        cur_inp = points[i] # P C
+        cur_inp = points[i]  # P C
         cur_inp = cur_inp.reshape(canvas_shape[0], canvas_shape[1], -1)
         cur_inp = cur_inp.cpu().numpy()
         distances = skfmm.distance(cur_inp[..., 0], dx=dx)
@@ -338,6 +341,7 @@ def unopt_alpha_to_sdf(points: th.Tensor, dx: th.Tensor, canvas_shape=None) -> t
     if B == 1:
         outputs = outputs.squeeze(0).squeeze(-1)
     return outputs
+
 
 # To HSL
 

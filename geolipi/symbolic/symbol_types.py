@@ -1,4 +1,3 @@
-
 import re
 import numpy as np
 import sympy as sp
@@ -21,11 +20,13 @@ PARAM_TYPE = type_union[np.ndarray, th.Tensor, SympyTuple, Tuple]
 # Combinators:
 COMBINATOR_TYPE = type_union[Combinator]
 BASE_COMBINATORS = type_union[
-    Union, Intersection, Difference, SwitchedDifference, Complement,
+    Union,
+    Intersection,
+    Difference,
+    SwitchedDifference,
+    Complement,
 ]
-PARAMETERIZED_COMBINATORS = type_union[
-    SmoothUnion, SmoothIntersection, SmoothDifference
-]
+PARAMETERIZED_COMBINATORS = type_union[SmoothUnion, SmoothIntersection, SmoothDifference]
 
 # Modifiers
 MOD_TYPE = type_union[Modifier3D, Modifier2D]
@@ -34,9 +35,7 @@ POSITIONALMOD_TYPE = type_union[PositionalTransform2D, PositionalTransform3D]
 SDFMOD_TYPE = type_union[SDFModifier2D, SDFModifier3D]
 MACRO_TYPE = type_union[Macro2D, Macro3D]
 
-TRANSLATE_TYPE = type_union[
-    Translate3D, Translate2D
-]  # also the translation syms will be affected.
+TRANSLATE_TYPE = type_union[Translate3D, Translate2D]  # also the translation syms will be affected.
 ROTATE_TYPE = type_union[EulerRotate3D, EulerRotate2D]
 SCALE_TYPE = type_union[Scale3D, Scale2D]
 SHEAR_TYPE = type_union[Shear3D, Shear2D]
@@ -52,9 +51,7 @@ GENERAL_PARAM_SYM = type_union[
 ]
 GENERAL_MACROS = type_union[GENERAL_REFLECT, GENERAL_PARAM_SYM]
 
-PREFIXED_AXIS_REFLECT = type_union[
-    ReflectX2D, ReflectY2D, ReflectX3D, ReflectY3D, ReflectZ3D
-]
+PREFIXED_AXIS_REFLECT = type_union[ReflectX2D, ReflectY2D, ReflectX3D, ReflectY3D, ReflectZ3D]
 PREFIXED_AXIS_SYM = type_union[
     TranslationSymmetryX2D,
     TranslationSymmetryY2D,
@@ -111,6 +108,4 @@ UNOPT_ALPHA = AlphaToSDF2D
 
 EXPR_TYPE = type_union[GLExpr, sp.core.operations.AssocOp, sp.core.power.Pow]
 
-SUPERSET_TYPE  = type_union[EXPR_TYPE, GLFunction]
-
-
+SUPERSET_TYPE = type_union[EXPR_TYPE, GLFunction]

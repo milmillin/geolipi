@@ -1,15 +1,18 @@
 import inspect
 
+
 def list_missing_default_specs(include_sysl: bool = True):
     missing = []
     try:
         import geolipi.symbolic as gls
+
         modules = [gls]
     except Exception:
         modules = []
     if include_sysl:
         try:
             import sysl.sysl.symbolic as sysl_sym
+
             modules.append(sysl_sym)
         except Exception:
             pass
@@ -40,5 +43,3 @@ def list_missing_default_specs(include_sysl: bool = True):
                 missing.append((obj.__module__, name, f"error: {type(e).__name__}"))
 
     return missing
-
-

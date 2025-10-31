@@ -38,11 +38,11 @@ def expr_to_sdf(
 ):
     """
     Converts a GeoLIPI SDF expression into a Signed Distance Field (SDF) using a sketcher.
-    
+
     **DEPRECATED**: Use recursive_evaluate from evaluate_expression instead.
-    
-    This function is faster than `recursive_evaluate` as it evaluates the expression using a stack-based approach. 
-    However, it does not support all GeoLIPI operations, notably higher-order primitives, and certain modifiers. 
+
+    This function is faster than `recursive_evaluate` as it evaluates the expression using a stack-based approach.
+    However, it does not support all GeoLIPI operations, notably higher-order primitives, and certain modifiers.
 
     Parameters:
         expression (GLFunction): The GLFunction expression to be converted to an SDF.
@@ -56,10 +56,15 @@ def expr_to_sdf(
     """
     from geolipi.symbolic.resolve import resolve_macros
     from geolipi.symbolic.symbol_types import (
-        MACRO_TYPE, MOD_TYPE, TRANSLATE_TYPE, SCALE_TYPE, PRIM_TYPE, 
-        TRANSSYM_TYPE, COMBINATOR_TYPE
+        MACRO_TYPE,
+        MOD_TYPE,
+        TRANSLATE_TYPE,
+        SCALE_TYPE,
+        PRIM_TYPE,
+        TRANSSYM_TYPE,
+        COMBINATOR_TYPE,
     )
-    
+
     transforms_stack = [sketcher.get_affine_identity()]
     execution_stack = []
     operator_stack = []
@@ -126,11 +131,7 @@ def expr_to_sdf(
         else:
             raise ValueError(f"Unknown expression type {type(cur_expr)}")
 
-        while (
-            operator_stack
-            and len(execution_stack) - execution_pointer_index[-1]
-            >= operator_nargs_stack[-1]
-        ):
+        while operator_stack and len(execution_stack) - execution_pointer_index[-1] >= operator_nargs_stack[-1]:
             n_args = operator_nargs_stack.pop()
             operator = operator_stack.pop()
             _ = execution_pointer_index.pop()
@@ -155,16 +156,22 @@ def expr_to_colored_canvas(
 ):
     """
     **DEPRECATED**: Use recursive_evaluate from evaluate_expression instead.
-    
+
     TODO: This function is to be tested.
     """
     from sympy import Symbol
     from geolipi.symbolic.resolve import resolve_macros
     from geolipi.symbolic.symbol_types import (
-        MACRO_TYPE, MOD_TYPE, TRANSLATE_TYPE, SCALE_TYPE, PRIM_TYPE, 
-        TRANSSYM_TYPE, COMBINATOR_TYPE, APPLY_COLOR_TYPE
+        MACRO_TYPE,
+        MOD_TYPE,
+        TRANSLATE_TYPE,
+        SCALE_TYPE,
+        PRIM_TYPE,
+        TRANSSYM_TYPE,
+        COMBINATOR_TYPE,
+        APPLY_COLOR_TYPE,
     )
-    
+
     transforms_stack = [sketcher.get_affine_identity()]
     execution_stack = []
     execution_pointer_index = []

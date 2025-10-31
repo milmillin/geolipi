@@ -16,7 +16,6 @@ def import_bpy():
     return module
 
 
-
 def clean_up(avoid_keys=[]):
     """
     Cleans up the Blender scene by removing various data types except those specified in the avoid list.
@@ -84,17 +83,13 @@ def init_lights(sun_energy=3.5):
         sun_energy (float, optional): The energy level of the sun light. Defaults to 3.5.
     """
     bpy = import_bpy()
-    bpy.ops.object.light_add(
-        type="SUN", radius=1, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1)
-    )
+    bpy.ops.object.light_add(type="SUN", radius=1, align="WORLD", location=(0, 0, 0), scale=(1, 1, 1))
     light = bpy.data.objects["Sun"]
     light.data.angle = 25 / 180.0 * math.pi
     light.data.energy = sun_energy
 
     bpy.data.scenes[0].world.use_nodes = True
-    bpy.data.scenes[0].world.node_tree.nodes["Background"].inputs[
-        "Color"
-    ].default_value = (0.1, 0.1, 0.1, 1)
+    bpy.data.scenes[0].world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.1, 0.1, 0.1, 1)
 
 
 # https://blender.stackexchange.com/questions/55702/getting-global-axis-value-of-the-vertex-with-the-lowest-value
