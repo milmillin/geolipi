@@ -1,21 +1,21 @@
 ALIASES = {
-  "vec2": "Vector[2]",
-  "vec3": "Vector[3]",
-  "vec4": "Vector[4]",
-  "point2": "Vector[2]",
-  "point3": "Vector[3]",
-  "color3": "Vector[3]",
-  "color4": "Vector[4]",
-  "optional": "Optional",
-  "list": "List",
-  "tuple": "Tuple",
-  "dict": "Dict",
-  "union": "Union",
-  "expr": "Expr",
-  "node": "Node",
-  "float2": "Vector[2]",
-  "float3": "Vector[3]",
-  "float4": "Vector[4]",
+    "vec2": "Vector[2]",
+    "vec3": "Vector[3]",
+    "vec4": "Vector[4]",
+    "point2": "Vector[2]",
+    "point3": "Vector[3]",
+    "color3": "Vector[3]",
+    "color4": "Vector[4]",
+    "optional": "Optional",
+    "list": "List",
+    "tuple": "Tuple",
+    "dict": "Dict",
+    "union": "Union",
+    "expr": "Expr",
+    "node": "Node",
+    "float2": "Vector[2]",
+    "float3": "Vector[3]",
+    "float4": "Vector[4]",
 }
 
 
@@ -58,6 +58,7 @@ def validate_module_specs(modules: list) -> dict:
     """Validate all GLFunction.default_spec() in provided modules; returns {ClassName: [errors]}"""
     import inspect
     from geolipi.symbolic.base import GLFunction
+
     results: dict = {}
     for mod in modules:
         for name, obj in inspect.getmembers(mod, inspect.isclass):

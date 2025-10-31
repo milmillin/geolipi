@@ -3,6 +3,7 @@ from sympy import Tuple as SympyTuple
 import sympy as sp
 from .registry import register_symbol
 
+
 class Primitive3D(GLFunction):
     """Functions for declaring 3D primitives."""
 
@@ -34,6 +35,7 @@ class Primitive3D(GLFunction):
         else:
             final = f"{self.func.__name__}()"
         return final
+
 
 @register_symbol
 class Sphere3D(Primitive3D):
@@ -140,12 +142,12 @@ class Plane3D(Primitive3D):
 
 @register_symbol
 class HexPrism3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_hex_prism
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"h": {"type": "Vector[2]"}}
@@ -153,12 +155,12 @@ class HexPrism3D(Primitive3D):
 
 @register_symbol
 class TriPrism3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_tri_prism
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"h": {"type": "Vector[2]"}}
@@ -166,12 +168,12 @@ class TriPrism3D(Primitive3D):
 
 @register_symbol
 class Capsule3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_capsule
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"a": {"type": "Vector[3]"}, "b": {"type": "Vector[3]"}, "r": {"type": "float", "min": 0.0}}
@@ -179,12 +181,12 @@ class Capsule3D(Primitive3D):
 
 @register_symbol
 class VerticalCapsule3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_vertical_capsule
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"h": {"type": "float", "min": 0.0}, "r": {"type": "float", "min": 0.0}}
@@ -192,12 +194,12 @@ class VerticalCapsule3D(Primitive3D):
 
 @register_symbol
 class VerticalCappedCylinder3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_capped_cylinder
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"h": {"type": "float", "min": 0.0}, "r": {"type": "float", "min": 0.0}}
@@ -205,12 +207,12 @@ class VerticalCappedCylinder3D(Primitive3D):
 
 @register_symbol
 class CappedCylinder3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_capped_cylinder
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"h": {"type": "float", "min": 0.0}, "r": {"type": "float", "min": 0.0}}
@@ -218,12 +220,12 @@ class CappedCylinder3D(Primitive3D):
 
 @register_symbol
 class Cylinder3D(CappedCylinder3D):
-
     """
     This class is mapped to the following evaluator function(s):
     # TODO: No Mapping yet.
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"h": {"type": "float", "min": 0.0}, "r": {"type": "float", "min": 0.0}}
@@ -231,12 +233,12 @@ class Cylinder3D(CappedCylinder3D):
 
 @register_symbol
 class ArbitraryCappedCylinder3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_arbitrary_capped_cylinder
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"a": {"type": "Vector[3]"}, "b": {"type": "Vector[3]"}, "r": {"type": "float", "min": 0.0}}
@@ -244,51 +246,64 @@ class ArbitraryCappedCylinder3D(Primitive3D):
 
 @register_symbol
 class RoundedCylinder3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_rounded_cylinder
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"ra": {"type": "float", "min": 0.0}, "rb": {"type": "float", "min": 0.0}, "h": {"type": "float", "min": 0.0}}
+        return {
+            "ra": {"type": "float", "min": 0.0},
+            "rb": {"type": "float", "min": 0.0},
+            "h": {"type": "float", "min": 0.0},
+        }
 
 
 @register_symbol
 class CappedCone3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_capped_cone
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"r1": {"type": "float", "min": 0.0}, "r2": {"type": "float", "min": 0.0}, "h": {"type": "float", "min": 0.0}}
+        return {
+            "r1": {"type": "float", "min": 0.0},
+            "r2": {"type": "float", "min": 0.0},
+            "h": {"type": "float", "min": 0.0},
+        }
 
 
 @register_symbol
 class ArbitraryCappedCone(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_arbitrary_capped_cone
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"a": {"type": "Vector[3]"}, "b": {"type": "Vector[3]"}, "ra": {"type": "float", "min": 0.0}, "rb": {"type": "float", "min": 0.0}}
+        return {
+            "a": {"type": "Vector[3]"},
+            "b": {"type": "Vector[3]"},
+            "ra": {"type": "float", "min": 0.0},
+            "rb": {"type": "float", "min": 0.0},
+        }
 
 
 @register_symbol
 class SolidAngle3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_solid_angle
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"angle": {"type": "float"}, "ra": {"type": "float", "min": 0.0}}
@@ -296,12 +311,12 @@ class SolidAngle3D(Primitive3D):
 
 @register_symbol
 class CutSphere3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_cut_sphere
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"r": {"type": "float", "min": 0.0}, "h": {"type": "float"}}
@@ -309,12 +324,12 @@ class CutSphere3D(Primitive3D):
 
 @register_symbol
 class CutHollowSphere(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_cut_hollow_sphere
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"r": {"type": "float", "min": 0.0}, "h": {"type": "float"}, "t": {"type": "float", "min": 0.0}}
@@ -322,51 +337,64 @@ class CutHollowSphere(Primitive3D):
 
 @register_symbol
 class DeathStar3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_death_star
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"ra": {"type": "float", "min": 0.0}, "rb": {"type": "float", "min": 0.0}, "d": {"type": "float", "min": 0.0}}
+        return {
+            "ra": {"type": "float", "min": 0.0},
+            "rb": {"type": "float", "min": 0.0},
+            "d": {"type": "float", "min": 0.0},
+        }
 
 
 @register_symbol
 class RoundCone3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_round_cone
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"r1": {"type": "float", "min": 0.0}, "r2": {"type": "float", "min": 0.0}, "h": {"type": "float", "min": 0.0}}
+        return {
+            "r1": {"type": "float", "min": 0.0},
+            "r2": {"type": "float", "min": 0.0},
+            "h": {"type": "float", "min": 0.0},
+        }
 
 
 @register_symbol
 class ArbitraryRoundCone3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_arbitrary_round_cone
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"a": {"type": "Vector[3]"}, "b": {"type": "Vector[3]"}, "r1": {"type": "float", "min": 0.0}, "r2": {"type": "float", "min": 0.0}}
+        return {
+            "a": {"type": "Vector[3]"},
+            "b": {"type": "Vector[3]"},
+            "r1": {"type": "float", "min": 0.0},
+            "r2": {"type": "float", "min": 0.0},
+        }
 
 
 @register_symbol
 class InexactEllipsoid3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_inexact_ellipsoid
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"r": {"type": "Vector[3]"}}
@@ -374,12 +402,12 @@ class InexactEllipsoid3D(Primitive3D):
 
 @register_symbol
 class RevolvedVesica3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_revolved_vesica
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"a": {"type": "Vector[3]"}, "b": {"type": "Vector[3]"}, "w": {"type": "float", "min": 0.0}}
@@ -387,25 +415,30 @@ class RevolvedVesica3D(Primitive3D):
 
 @register_symbol
 class Rhombus3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_rhombus
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"la": {"type": "float", "min": 0.0}, "lb": {"type": "float", "min": 0.0}, "h": {"type": "float", "min": 0.0}, "ra": {"type": "float", "min": 0.0}}
+        return {
+            "la": {"type": "float", "min": 0.0},
+            "lb": {"type": "float", "min": 0.0},
+            "h": {"type": "float", "min": 0.0},
+            "ra": {"type": "float", "min": 0.0},
+        }
 
 
 @register_symbol
 class Octahedron3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_octahedron
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"s": {"type": "float", "min": 0.0}}
@@ -413,12 +446,12 @@ class Octahedron3D(Primitive3D):
 
 @register_symbol
 class InexactOctahedron3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_inexact_octahedron
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"s": {"type": "float", "min": 0.0}}
@@ -426,12 +459,12 @@ class InexactOctahedron3D(Primitive3D):
 
 @register_symbol
 class Pyramid3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_pyramid
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"h": {"type": "float", "min": 0.0}}
@@ -439,12 +472,12 @@ class Pyramid3D(Primitive3D):
 
 @register_symbol
 class Triangle3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_triangle
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {"a": {"type": "Vector[3]"}, "b": {"type": "Vector[3]"}, "c": {"type": "Vector[3]"}}
@@ -452,26 +485,31 @@ class Triangle3D(Primitive3D):
 
 @register_symbol
 class Quadrilateral3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_quadrilateral
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"a": {"type": "Vector[3]"}, "b": {"type": "Vector[3]"}, "c": {"type": "Vector[3]"}, "d": {"type": "Vector[3]"}}
+        return {
+            "a": {"type": "Vector[3]"},
+            "b": {"type": "Vector[3]"},
+            "c": {"type": "Vector[3]"},
+            "d": {"type": "Vector[3]"},
+        }
 
 
 @register_symbol
 class NoParamCuboid3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_no_param_cuboid
     - geometry_nodes.geonodes.create_cuboid_node_seq
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {}
@@ -479,13 +517,13 @@ class NoParamCuboid3D(Primitive3D):
 
 @register_symbol
 class NoParamSphere3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_no_param_sphere
     - geometry_nodes.geonodes.create_sphere_node_seq
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {}
@@ -493,13 +531,13 @@ class NoParamSphere3D(Primitive3D):
 
 @register_symbol
 class NoParamCylinder3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_no_param_cylinder
     - geometry_nodes.geonodes.create_cylinder_node_seq
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {}
@@ -507,28 +545,37 @@ class NoParamCylinder3D(Primitive3D):
 
 @register_symbol
 class InexactSuperQuadrics3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_inexact_super_quadrics
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"skew_vec": {"type": "Vector[3]"}, "epsilon_1": {"type": "float", "min": 0.0}, "epsilon_2": {"type": "float", "min": 0.0}}
+        return {
+            "skew_vec": {"type": "Vector[3]"},
+            "epsilon_1": {"type": "float", "min": 0.0},
+            "epsilon_2": {"type": "float", "min": 0.0},
+        }
 
 
 @register_symbol
 class InexactAnisotropicGaussian3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_inexact_anisotropic_gaussian
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"center": {"type": "Vector[3]"}, "axial_radii": {"type": "Vector[3]"}, "scale_constant": {"type": "float"}}
+        return {
+            "center": {"type": "Vector[3]"},
+            "axial_radii": {"type": "Vector[3]"},
+            "scale_constant": {"type": "float"},
+        }
+
 
 class NeoPrimitive3D(Primitive3D):
     """
@@ -540,28 +587,29 @@ class NeoPrimitive3D(Primitive3D):
 
 @register_symbol
 class SDFGrid3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf3d_sdf_grid
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
-        return {"sdf_grid": {"type": "Tensor[float, (D,H,W)]"},
-                 "name": {"type": "string"}, 
-                 "bound_threshold": {"type": "float", "optional": True}
-                 }
+        return {
+            "sdf_grid": {"type": "Tensor[float, (D,H,W)]"},
+            "name": {"type": "string"},
+            "bound_threshold": {"type": "float", "optional": True},
+        }
 
 
 @register_symbol
 class NullExpression3D(Primitive3D):
-
     """
     This class is mapped to the following evaluator function(s):
     - torch_compute.primitives_3d.sdf_null_op
     Read evaluator specific documentation for more.
     """
+
     @classmethod
     def default_spec(cls):
         return {}

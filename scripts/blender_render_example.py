@@ -1,4 +1,5 @@
 """An example script for loading a GeoLIPI program in blender and rendering it. Note that only a few primitive types are supported currently."""
+
 import os
 import sys
 import math
@@ -22,12 +23,11 @@ for key, value in sys.modules.items():
 
 for key in delete_key:
     del sys.modules[key]
-    
+
 import geolipi.symbolic as gls
 from geolipi.geometry_nodes.evaluate_graph import expr_to_geonode_graph
 from geolipi.geometry_nodes.bl_utils import clean_up, init_camera, init_lights, set_render_settings
 from geolipi.geometry_nodes.utils import BASE_COLORS
-
 
 
 # Load a bunch of programs inferred by SIRI.
@@ -37,7 +37,7 @@ str_to_cmd_mapper = gls.get_cmd_mapper()
 # Load a program
 selected_ind = 13
 file_name = os.path.join(GEOLIPI_PATH, "assets", "example_inferred_programs.pkl")
-with open(file_name, 'rb') as f:
+with open(file_name, "rb") as f:
     expressions = cPickle.load(f)
 str_to_cmd_mapper = gls.get_cmd_mapper()
 expressions = [eval(p, str_to_cmd_mapper) for p in expressions]
@@ -50,19 +50,19 @@ init_lights()
 set_render_settings(resolution=512, transparent_mode=True)
 
 origin_point = mathutils.Vector((0, 0, 0))
-bpy.ops.mesh.primitive_plane_add(size=1, enter_editmode=False, align='WORLD', location=(0, 0, -0.0), scale=(1, 1, 1))
+bpy.ops.mesh.primitive_plane_add(size=1, enter_editmode=False, align="WORLD", location=(0, 0, -0.0), scale=(1, 1, 1))
 plane_obj = bpy.context.active_object
 
 # set camera
-theta = 45 
-theta = theta * math.pi/180
+theta = 45
+theta = theta * math.pi / 180
 size = math.sqrt(8)
 camera_x = size * math.cos(theta)
 camera_y = size * math.sin(theta)
-camera = bpy.data.objects['Camera']
+camera = bpy.data.objects["Camera"]
 camera.location = (camera_x, camera_y, 1.5)
 direction = origin_point - camera.location
-rotQuat = direction.to_track_quat('-Z', 'Y')
+rotQuat = direction.to_track_quat("-Z", "Y")
 camera.rotation_euler = rotQuat.to_euler()
 
 # Generate Geometry Node Graph:
@@ -75,4 +75,4 @@ Path(save_loc).mkdir(parents=True, exist_ok=True)
 save_template = f"{save_loc}/{selected_ind}"
 save_file_name = f"{save_template}.png"
 bpy.context.scene.render.filepath = save_file_name
-bpy.ops.render.render(write_still = True)
+bpy.ops.render.render(write_still=True)

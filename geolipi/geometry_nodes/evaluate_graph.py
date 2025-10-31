@@ -14,6 +14,7 @@ from .materials import (
     create_monotone_material,
 )
 
+
 # TODO: Note - its always in the rectify transform mode.
 def expr_to_geonode_graph(
     expression: GLFunction,
@@ -26,7 +27,7 @@ def expr_to_geonode_graph(
     """
     Converts a geometric expression into a Blender geometry node graph.
     Currently, this function only supports the NoParam 2D/3D Primitives, and basic boolean/transform operations.
-    
+
     Parameters:
         expression (GLFunction): The geometric expression to be converted into a node graph.
         dummy_obj (bpy.types.Object): The Blender object to which the node graph will be attached.
@@ -110,13 +111,9 @@ def expr_to_geonode_graph(
                 elif material_type == "with_edge":
                     material = create_edge_material_tree(mat_name, color)
                 elif material_type == "monotone":
-                    color_list = [
-                        colors[(mat_id + i * 2) % len(colors)] for i in range(3)
-                    ]
+                    color_list = [colors[(mat_id + i * 2) % len(colors)] for i in range(3)]
                     silhuette_color = colors[(mat_id - 1) % len(colors)]
-                    material = create_monotone_material(
-                        mat_name, color, color_list, silhuette_color
-                    )
+                    material = create_monotone_material(mat_name, color, color_list, silhuette_color)
 
                 material_node.inputs["Material"].default_value = material
                 mat_id += 1
@@ -128,13 +125,14 @@ def expr_to_geonode_graph(
 
     return node_group
 
+
 def _parse_param_from_expr(expression, params):
     if params:
         param_list = []
         for ind, param in enumerate(params):
             if param in expression.lookup_table:
                 cur_param = expression.lookup_table[param]
-            else: 
+            else:
                 cur_param = param
             if isinstance(cur_param, th.Tensor):
                 cur_param = list(params.detach().cpu().numpy())

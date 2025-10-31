@@ -42,6 +42,7 @@ INFIX_OPERATORS = {
     sp.Pow: "**",
 }
 
+
 def magic_method_decorator(base_class=Expr):
     """
     Decorates a class with binary magic methods for symbolic combination.
@@ -50,6 +51,7 @@ def magic_method_decorator(base_class=Expr):
     Args:
         base_class: The symbolic class whose methods to use (Expr or Function).
     """
+
     def decorator(cls):
         def make_magic_method(magic):
             base_method = getattr(base_class, magic)
@@ -61,9 +63,11 @@ def magic_method_decorator(base_class=Expr):
                     expr_other = other
                 elif isinstance(other, (SympyTuple, th.Tensor)):
                     import geolipi.symbolic as gls
+
                     expr_other = gls.Param(other)
                 elif isinstance(other, (int, float, SympyFloat, th.Tensor)):
                     import geolipi.symbolic as gls
+
                     expr_other = gls.Param((float(other),))
                 else:
                     print(f"other: {other} if else {type(other)}")
@@ -80,8 +84,9 @@ def magic_method_decorator(base_class=Expr):
             setattr(cls, magic, make_magic_method(magic))
 
         return cls
-    
+
     return decorator
+
 
 class GLBase:
     """
@@ -90,19 +95,31 @@ class GLBase:
     2. Conversion to sympy / torch / cpu / cuda.
     3. Pretty printing, __str__ and __repr__ and pickling.
     """
+
     args: Tuple[sp.Basic, ...]
     lookup_table: Dict[sp.Symbol, th.Tensor]
     func: Any
 
-    def gather_tensor_list(self, type_annotate: bool =False, index_annotate: bool =False,
-            selected_classes: type_union[Tuple[type, ...], None] = None,) -> type_union[List[th.Tensor], List[Tuple[th.Tensor, type, int]]]:
+    def gather_tensor_list(
+        self,
+        type_annotate: bool = False,
+        index_annotate: bool = False,
+        selected_classes: type_union[Tuple[type, ...], None] = None,
+    ) -> type_union[List[th.Tensor], List[Tuple[th.Tensor, type, int]]]:
         if selected_classes is None:
-            selected_classes = (GLBase, )
-        tensor_list, ind = self._gather_tensor_list(selected_classes=selected_classes, 
-        type_annotate=type_annotate, index_annotate=index_annotate, cur_ind=0)
+            selected_classes = (GLBase,)
+        tensor_list, ind = self._gather_tensor_list(
+            selected_classes=selected_classes, type_annotate=type_annotate, index_annotate=index_annotate, cur_ind=0
+        )
         return tensor_list
-    
-    def _gather_tensor_list(self, selected_classes: Tuple[type, ...], type_annotate: bool =False, index_annotate: bool =False, cur_ind: int =0):
+
+    def _gather_tensor_list(
+        self,
+        selected_classes: Tuple[type, ...],
+        type_annotate: bool = False,
+        index_annotate: bool = False,
+        cur_ind: int = 0,
+    ):
         """
         Gathers a list of tensors present in the expression.
         Used for Parameter optimizing without converting form.
@@ -110,8 +127,12 @@ class GLBase:
         tensors = []
         for local_ind, sub_expr in enumerate(self.args):
             if isinstance(sub_expr, GLBase):
-                new_tensors, cur_ind = sub_expr._gather_tensor_list(selected_classes=selected_classes, 
-                type_annotate=type_annotate, index_annotate=index_annotate, cur_ind=cur_ind)
+                new_tensors, cur_ind = sub_expr._gather_tensor_list(
+                    selected_classes=selected_classes,
+                    type_annotate=type_annotate,
+                    index_annotate=index_annotate,
+                    cur_ind=cur_ind,
+                )
                 tensors += new_tensors
             elif isinstance(sub_expr, Symbol):
                 if sub_expr in self.lookup_table.keys():
@@ -127,15 +148,15 @@ class GLBase:
                         tensors.append(self.lookup_table[sub_expr])
                     cur_ind += 1
         return tensors, cur_ind
-    
-    def recursive_transform(self, transform_map: Dict[type, Callable[['GLBase'], 'GLBase']]) -> 'GLBase':
+
+    def recursive_transform(self, transform_map: Dict[type, Callable[["GLBase"], "GLBase"]]) -> "GLBase":
         """
         Recursively transforms the expression using a mapping of types to transformation functions.
-        
+
         Args:
             transform_map: Dict mapping expression types to transformation functions.
                          Each function takes an expression and returns a transformed expression.
-                         
+
         Returns:
             A new expression with transformations applied recursively.
         """
@@ -149,17 +170,16 @@ class GLBase:
             else:
                 # Keep non-GLBase arguments as is
                 new_args.append(arg)
-        
+
         # Rebuild the expression with transformed arguments
         rebuilt_expr = self.rebuild_expr(new_args)
-        
+
         # Apply transformation to the rebuilt expression if there's a matching type
         expr_type = type(rebuilt_expr)
         if expr_type in transform_map:
             return transform_map[expr_type](rebuilt_expr)
         else:
             return rebuilt_expr
-    
 
     def rebuild_expr(self, resolved_args: List[sp.Basic]):
         """
@@ -180,7 +200,7 @@ class GLBase:
             new_expr = type(self)(*resolved_args)
         return new_expr
 
-    def _inject_tensor_list(self, tensor_list: List[Tuple[th.Tensor, int]], cur_ind: int =0):
+    def _inject_tensor_list(self, tensor_list: List[Tuple[th.Tensor, int]], cur_ind: int = 0):
         resolved_args = []
         valid_inds = [x[1] for x in tensor_list]
         for sub_expr in self.args:
@@ -209,11 +229,13 @@ class GLBase:
         """
         if len(tensor_list) == 0:
             return self
-        
+
         if isinstance(tensor_list[0], th.Tensor):
             # tensor_list is List[th.Tensor]
             inner_tensor_list: List[Tuple[th.Tensor, int]] = [(x, i) for i, x in enumerate(tensor_list)]  # type: ignore
-        elif isinstance(tensor_list[0], tuple) and len(tensor_list[0]) == 2 and isinstance(tensor_list[0][0], th.Tensor):
+        elif (
+            isinstance(tensor_list[0], tuple) and len(tensor_list[0]) == 2 and isinstance(tensor_list[0][0], th.Tensor)
+        ):
             # tensor_list is List[Tuple[th.Tensor, int]]
             inner_tensor_list = tensor_list  # type: ignore
         else:
@@ -221,11 +243,11 @@ class GLBase:
         new_expr, _ = self._inject_tensor_list(inner_tensor_list)
         return new_expr
 
-    def get_varnamed_expr(self, cur_ind = None):
+    def get_varnamed_expr(self, cur_ind=None):
         """
         Why only the ones in the lookup table?
-        During Compilation we treating the remaining, i.e. Symbols as constants. 
-        Other option -> 
+        During Compilation we treating the remaining, i.e. Symbols as constants.
+        Other option ->
         """
         if cur_ind is None:
             cur_ind = 0
@@ -245,8 +267,8 @@ class GLBase:
 
         new_expr = self.rebuild_expr(resolved_args)
         return new_expr, cur_ind
-    
-    def _get_varnamed_expr(self, cur_ind = None, var_map = None, prefix = "var", exclude_uniforms = False):
+
+    def _get_varnamed_expr(self, cur_ind=None, var_map=None, prefix="var", exclude_uniforms=False):
         """
         TBD: Support Uniform Exclusion. (Keep them as is I guess).
         """
@@ -256,6 +278,7 @@ class GLBase:
             var_map = {}
         resolved_args = []
         import geolipi.symbolic as gls
+
         for sub_expr in self.args:
             if isinstance(sub_expr, GLBase):
                 if exclude_uniforms and isinstance(sub_expr, gls.UniformVariable):
@@ -303,7 +326,7 @@ class GLBase:
             else:
                 raise ValueError(f"Cannot convert {sub_expr} to sp.")
             resolved_args.append(arg)
-        
+
         final_expr = self.rebuild_expr(resolved_args)
         return final_expr
 
@@ -317,7 +340,9 @@ class GLBase:
                 if sub_expr in self.lookup_table.keys():
                     arg = self.lookup_table[sub_expr].detach().cpu().numpy().tolist()
                     if not isinstance(arg, list):
-                        arg = [arg, ]
+                        arg = [
+                            arg,
+                        ]
                     arg = to_nested_tuple(arg)
                 else:
                     arg = sub_expr
@@ -328,12 +353,11 @@ class GLBase:
             resolved_args.append(arg)
         final_expr = self.rebuild_expr(resolved_args)
         return final_expr
-        
+
     def numpy(self):
-        """ Deprecated """
+        """Deprecated"""
         raise NotImplementedError("Numpy is deprecated. Use tensor instead.")
-         
-         
+
     def to(self, device: type_union[str, th.device]):
         """convert the expression to cuda or cpu"""
         resolved_args = []
@@ -348,9 +372,7 @@ class GLBase:
             elif isinstance(sub_expr, SYMPY_TYPES):
                 arg = sub_expr
             else:
-                raise ValueError(
-                    f"Error while converting {sub_expr} to device {device}."
-                )
+                raise ValueError(f"Error while converting {sub_expr} to device {device}.")
             resolved_args.append(arg)
 
         final_expr = self.rebuild_expr(resolved_args)
@@ -361,7 +383,7 @@ class GLBase:
         Moves all tensors in the expression to a CUDA device.
 
         Args:
-            device (int | str | torch.device | None): 
+            device (int | str | torch.device | None):
                 - None → use current CUDA device
                 - int → cuda:<index>
                 - str → e.g. 'cuda:1'
@@ -385,7 +407,6 @@ class GLBase:
         device = th.device("cpu")
         expr = self.to(device)
         return expr
-
 
     @property
     def device(self) -> type_union[str, th.device, None]:
@@ -414,7 +435,7 @@ class GLBase:
         if len(devices) == 1:
             return next(iter(devices))
         return "MIX"
-  
+
     @property
     def paramtype(self) -> type_union[str, None]:
         """
@@ -443,9 +464,8 @@ class GLBase:
         if not paramtypes:
             return None
         if len(paramtypes) == 1:
-            return next(iter(paramtypes))   
+            return next(iter(paramtypes))
         return "MIX"
-
 
     def pretty_print(self, tabs=0, tab_str="\t"):
         """
@@ -454,8 +474,7 @@ class GLBase:
         """
         args = self.args
         n_tabs = tab_str * tabs
-        replaced_args = [self.lookup_table.get(arg, arg) if isinstance(
-            arg, Symbol) else arg for arg in args]
+        replaced_args = [self.lookup_table.get(arg, arg) if isinstance(arg, Symbol) else arg for arg in args]
         str_args = []
         for arg in replaced_args:
             if isinstance(arg, GLBase):
@@ -487,8 +506,8 @@ class GLBase:
         else:
             final = f"{self.func.__name__}()"
         return final
-    
-    def __str__(self, order="INFIX", with_lookup=True,*args, **kwargs):
+
+    def __str__(self, order="INFIX", with_lookup=True, *args, **kwargs):
         raise NotImplementedError
 
     def state(self):
@@ -507,14 +526,14 @@ class GLBase:
             "symbol_tensor_map": tensor_lookup,
         }
         return state
-        
+
     @classmethod
     def from_state(cls, state):
         expr_str = state["expr_str"]
         tensor_lookup = state["symbol_tensor_map"]
 
         # Step 1: evaluate the symbolic expression (we assume all classes/functions are available)
-        global_dict = {'sp': sp, 'th': th, 'torch': th}
+        global_dict = {"sp": sp, "th": th, "torch": th}
         global_dict.update(SYMBOL_REGISTRY)
         expr = eval(expr_str, global_dict)
 
@@ -533,18 +552,12 @@ class GLBase:
 
             elif isinstance(expr, GLExpr):
                 # Rebuild recursively
-                args = [
-                    inject(arg) if isinstance(arg, (GLBase, sp.Basic)) else arg
-                    for arg in expr.expr.args
-                ]
+                args = [inject(arg) if isinstance(arg, (GLBase, sp.Basic)) else arg for arg in expr.expr.args]
                 new_expr = expr.expr.func(*args)
                 return GLExpr(new_expr)
 
             elif isinstance(expr, sp.Basic):
-                new_args = [
-                    inject(arg) if isinstance(arg, (GLBase, sp.Basic)) else arg
-                    for arg in expr.args
-                ]
+                new_args = [inject(arg) if isinstance(arg, (GLBase, sp.Basic)) else arg for arg in expr.args]
                 return expr.func(*new_args)
 
             else:
@@ -573,7 +586,7 @@ class GLBase:
 
     def is_zero(self):
         return False
-        
+
     def __len__(self):
         length = 1
         for arg in self.args:
@@ -582,7 +595,7 @@ class GLBase:
             else:
                 length += 0
         return length
-    
+
     def get_arg(self, index):
         arg = self.args[index]
         if arg in self.lookup_table:
@@ -602,7 +615,7 @@ class GLExpr(GLBase):
         else:
             self.lookup_table = lookup_table
         self.func = expr.func
-        
+
     @property
     def args(self):
         return self.expr.args
@@ -660,8 +673,7 @@ class GLFunction(Function, GLBase):
     def __str__(self, order="INFIX", with_lookup: bool = True):
         args = self.args
         if with_lookup:
-            replaced_args = [self.lookup_table.get(arg, arg) if isinstance(
-                arg, Symbol) else arg for arg in args]
+            replaced_args = [self.lookup_table.get(arg, arg) if isinstance(arg, Symbol) else arg for arg in args]
         else:
             replaced_args = [arg for arg in args]
         str_args = []
@@ -674,7 +686,6 @@ class GLFunction(Function, GLBase):
                 else:
                     str_args.append(str(arg))
         return f"{self.func.__name__}({', '.join(str_args)})"
-
 
     # TODO: In line resolution of parameters.
     def doit(self, **hints):
@@ -720,6 +731,7 @@ class GLFunction(Function, GLBase):
         # TODO: Find if type checking can be done cheaply.
         return True
 
+
 class PrimitiveSpec(GLFunction):
     """Base Class nodes (or expression) in the compiled expressions."""
 
@@ -735,4 +747,3 @@ def to_nested_tuple(obj):
     else:
         # If it's not a list, it's typically a scalar (int/float)
         return obj
-

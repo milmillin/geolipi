@@ -111,7 +111,7 @@ star_reg_expression = gls.ApplyColor2D(
     gls.RegularStar2D((0.5,), (12.,), (5.,)), sp.Symbol("lilac"))
 circle_expr = gls.ApplyColor2D(
     gls.Circle2D((0.15,)), sp.Symbol("chartreuse"))
-mix_expr = gls.SourceOver(circle_expr, 
+mix_expr = gls.SourceOver(circle_expr,
     gls.SourceAtop(star_expression, star_reg_expression))
 
 

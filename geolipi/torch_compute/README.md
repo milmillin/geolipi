@@ -33,7 +33,7 @@ result = recursive_evaluate(expression, sketcher)
 
 - **Purpose**: Unrolls expressions into a linear sequence of operations
 - **Features**: Optimized for PyTorch's compilation process, generates efficient code
-- **Performance**: Fastest when used with `torch.compile()` 
+- **Performance**: Fastest when used with `torch.compile()`
 - **Use when**: You need maximum performance and are using PyTorch 2.0+ compilation
 
 ```python
@@ -57,7 +57,7 @@ result = compiled_fn(sketcher.get_coords())
 
 ### Deprecated Functions
 
-#### `expr_to_sdf()` and `expr_to_colored_canvas()` ⚠️ 
+#### `expr_to_sdf()` and `expr_to_colored_canvas()` ⚠️
 **Deprecated** - Use `recursive_evaluate()` instead.
 
 - **Purpose**: Legacy stack-based evaluation (kept for backward compatibility)
@@ -74,7 +74,7 @@ result = compiled_fn(sketcher.get_coords())
 
 ### SDF Functions
 - `sdf_functions_2d.py` - 2D signed distance field implementations
-- `sdf_functions_3d.py` - 3D signed distance field implementations  
+- `sdf_functions_3d.py` - 3D signed distance field implementations
 - `sdf_operators.py` - Boolean operations (union, intersection, difference)
 - `sdf_functions_higher.py` - Higher-order primitive operations
 

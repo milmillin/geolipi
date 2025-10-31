@@ -14,11 +14,12 @@ from .unroll_expression import unroll_expression
 NUM_ITERATIONS = 2000
 CONVERGENCE_THRESHOLD = 1e-3
 
+
 class Renderer:
     """
     The Renderer class is designed to render 3D scenes based on provided signed distance
     function (SDF) expressions. It supports various rendering settings including camera
-    parameters, lighting settings, and material properties. The class can handle both 
+    parameters, lighting settings, and material properties. The class can handle both
     standard and recursive SDF evaluation and offers options for compiling expressions
     to reduce the rendering time.
 
@@ -36,12 +37,21 @@ class Renderer:
         compile_expression (bool): Flag to compile the SDF expressions for performance.
 
     """
-    def __init__(self, resolution=(512, 512), num_iterations=NUM_ITERATIONS,
-                 convergence_threshold=CONVERGENCE_THRESHOLD,
-                 camera_params=None, light_setting=None,
-                 recursive_evaluator=True, compile_expression=False,
-                 unroll_expression=False, torch_compile=False,
-                 device="cuda", dtype=th.float32):
+
+    def __init__(
+        self,
+        resolution=(512, 512),
+        num_iterations=NUM_ITERATIONS,
+        convergence_threshold=CONVERGENCE_THRESHOLD,
+        camera_params=None,
+        light_setting=None,
+        recursive_evaluator=True,
+        compile_expression=False,
+        unroll_expression=False,
+        torch_compile=False,
+        device="cuda",
+        dtype=th.float32,
+    ):
         self.dtype = th.float32
         self.device = device
         # Camera Matrix
@@ -55,7 +65,8 @@ class Renderer:
                 target_position=th.tensor([0.0, 0, 0.0], dtype=dtype, device=device),
                 up_direction=th.tensor([0.0, 1.0, 0.0], dtype=dtype, device=device),
                 f=0.75,
-                resolution=resolution)
+                resolution=resolution,
+            )
         else:
             # convert lists to tensors:
             for key, value in camera_params.items():
@@ -63,14 +74,14 @@ class Renderer:
                     camera_params[key] = th.tensor(value, dtype=dtype, device=device)
             self.camera_params = camera_params
 
-
         if light_setting is None:
             # Default Light
             self.light_setting = dict(
-                light_ambient_color = th.ones(1, 1, 3, device=self.device),
-                light_diffuse_color = th.ones(1, 1, 3, device=self.device),
-                light_specular_color = th.ones(1, 1, 3, device=self.device),
-                light_directions = th.tensor([1.0, -0.5, 0.0], dtype=dtype, device=device))
+                light_ambient_color=th.ones(1, 1, 3, device=self.device),
+                light_diffuse_color=th.ones(1, 1, 3, device=self.device),
+                light_specular_color=th.ones(1, 1, 3, device=self.device),
+                light_directions=th.tensor([1.0, -0.5, 0.0], dtype=dtype, device=device),
+            )
         else:
             for key, value in light_setting.items():
                 if isinstance(value, list):
@@ -82,11 +93,9 @@ class Renderer:
         # Sketchers:
         # does it matter?
         min_res = 32
-        self.sketcher = Sketcher(resolution=min_res, device=device,
-                                 dtype=dtype, n_dims=3)
+        self.sketcher = Sketcher(resolution=min_res, device=device, dtype=dtype, n_dims=3)
         self.recursive_evaluator = recursive_evaluator
-        self.secondary_sketcher = Sketcher(resolution=min_res, device=device,
-                                        dtype=dtype, n_dims=2)
+        self.secondary_sketcher = Sketcher(resolution=min_res, device=device, dtype=dtype, n_dims=2)
         if recursive_evaluator:
             self.eval_func = recursive_evaluate
         else:
@@ -100,16 +109,20 @@ class Renderer:
 
     def get_camera_matrix(self, resolution, f, *args, **kwargs):
         cx, cy = resolution[0], resolution[1]
-        camera_matrix = th.tensor([[f, 0.0, 0], [0.0, f * cx / cy, 0], [0.0, 0.0, 1.0]],
-                                  dtype=self.dtype, device=self.device)
+        camera_matrix = th.tensor(
+            [[f, 0.0, 0], [0.0, f * cx / cy, 0], [0.0, 0.0, 1.0]], dtype=self.dtype, device=self.device
+        )
         return camera_matrix
 
     def get_camera_position(self, distance, azimuth, elevation, *args, **kwargs):
-        camera_position = th.tensor([
-            +np.cos(elevation) * np.sin(azimuth),
-            -np.sin(elevation),
-            -np.cos(elevation) * np.cos(azimuth)
-        ], dtype=self.dtype, device=self.device) * distance
+        camera_position = (
+            th.tensor(
+                [+np.cos(elevation) * np.sin(azimuth), -np.sin(elevation), -np.cos(elevation) * np.cos(azimuth)],
+                dtype=self.dtype,
+                device=self.device,
+            )
+            * distance
+        )
         return camera_position
 
     def get_camera_rotation(self, camera_position, target_position, up_direction, *args, **kwargs):
@@ -133,14 +146,20 @@ class Renderer:
         ray_positions = th.stack((x_positions, y_positions, z_positions), dim=-1)
         ray_positions = ray_positions.reshape(-1, 3)
         # TODO: Can be refactored.
-        ray_positions = th.einsum("mn,...n->...m", th.inverse(camera_matrix),  ray_positions)
+        ray_positions = th.einsum("mn,...n->...m", th.inverse(camera_matrix), ray_positions)
         ray_positions = th.einsum("mn,...n->...m", camera_rotation, ray_positions) + camera_position
         ray_directions = nn.functional.normalize(ray_positions - camera_position, dim=-1)
         return ray_positions, ray_directions
-    
-    def render(self, sdf_expression, ground_expression=None, 
-               material_setting=None, finite_difference_epsilon=None,
-               convergence_threshold=None, num_iterations=None):
+
+    def render(
+        self,
+        sdf_expression,
+        ground_expression=None,
+        material_setting=None,
+        finite_difference_epsilon=None,
+        convergence_threshold=None,
+        num_iterations=None,
+    ):
         """
         Renders a 3D scene based on the provided signed distance function (SDF) expressions.
 
@@ -155,13 +174,33 @@ class Renderer:
         Returns:
             A tensor representing the rendered image, with shape corresponding to the specified resolution.
         """
-        self._compile_render_exprs(sdf_expression, ground_expression, material_setting, finite_difference_epsilon, convergence_threshold, num_iterations)
-        image = self._render_precompiled(sdf_expression, ground_expression, material_setting, finite_difference_epsilon, convergence_threshold, num_iterations)
+        self._compile_render_exprs(
+            sdf_expression,
+            ground_expression,
+            material_setting,
+            finite_difference_epsilon,
+            convergence_threshold,
+            num_iterations,
+        )
+        image = self._render_precompiled(
+            sdf_expression,
+            ground_expression,
+            material_setting,
+            finite_difference_epsilon,
+            convergence_threshold,
+            num_iterations,
+        )
         return image
-    
-    def _compile_render_exprs(self, sdf_expression, ground_expression=None, 
-               material_setting=None, finite_difference_epsilon=None,
-               convergence_threshold=None, num_iterations=None):
+
+    def _compile_render_exprs(
+        self,
+        sdf_expression,
+        ground_expression=None,
+        material_setting=None,
+        finite_difference_epsilon=None,
+        convergence_threshold=None,
+        num_iterations=None,
+    ):
 
         if ground_expression is None:
             ground_expression = self.create_ground_expr()
@@ -171,42 +210,73 @@ class Renderer:
         if self.compile_expression:
             compiled_obj = create_compiled_expr(overall_expression, self.sketcher, convert_to_cpu=False)
             expr_set = create_evaluation_batches([compiled_obj], convert_to_cuda=False)
-            def sdf_eval_func(ray_points): 
+
+            def sdf_eval_func(ray_points):
                 return batch_evaluate(expr_set, sketcher=self.sketcher, coords=ray_points).squeeze(0).unsqueeze(-1)
+
         else:
             if self.unroll_expression:
                 compiled_func, func_def, _ = unroll_expression(overall_expression, self.sketcher, param_mode="embedded")
-                compiled_func_ground, func_def_ground, _ = unroll_expression(ground_expression, self.sketcher, param_mode="embedded")
+                compiled_func_ground, func_def_ground, _ = unroll_expression(
+                    ground_expression, self.sketcher, param_mode="embedded"
+                )
                 if self.torch_compile:
                     compiled_func = th.compile(compiled_func, mode="max-autotune", fullgraph=True)
                     compiled_func_ground = th.compile(compiled_func_ground, mode="max-autotune", fullgraph=True)
                 self.eval_func = compiled_func
                 self.eval_func_ground = compiled_func_ground
-                def sdf_eval_func(ray_points, *args, **kwargs): 
+
+                def sdf_eval_func(ray_points, *args, **kwargs):
                     ray_points = self.sketcher.make_homogenous_coords(ray_points)
                     return self.eval_func(ray_points).unsqueeze(-1)
-                def ground_eval_func(ray_points, *args, **kwargs): 
+
+                def ground_eval_func(ray_points, *args, **kwargs):
                     ray_points = self.sketcher.make_homogenous_coords(ray_points)
                     return self.eval_func_ground(ray_points).unsqueeze(-1)
                     # return self.eval_func(ground_expression, sketcher=self.sketcher,
                     #                                                     secondary_sketcher=self.secondary_sketcher,
                     #                                                     coords=ray_points).unsqueeze(-1)
+
             else:
                 self.eval_func = recursive_evaluate
-                def sdf_eval_func(ray_points): return self.eval_func(overall_expression, sketcher=self.sketcher,
-                                                                secondary_sketcher=self.secondary_sketcher,
-                                                                coords=ray_points).unsqueeze(-1)
-                    # We can use batching
-                def ground_eval_func(ray_points): return self.eval_func(ground_expression, sketcher=self.sketcher,
-                                                                        secondary_sketcher=self.secondary_sketcher,
-                                                                        coords=ray_points).unsqueeze(-1)
+
+                def sdf_eval_func(ray_points):
+                    return self.eval_func(
+                        overall_expression,
+                        sketcher=self.sketcher,
+                        secondary_sketcher=self.secondary_sketcher,
+                        coords=ray_points,
+                    ).unsqueeze(-1)
+
+                # We can use batching
+                def ground_eval_func(ray_points):
+                    return self.eval_func(
+                        ground_expression,
+                        sketcher=self.sketcher,
+                        secondary_sketcher=self.secondary_sketcher,
+                        coords=ray_points,
+                    ).unsqueeze(-1)
+
         self.sdf_eval_func = sdf_eval_func
         self.ground_eval_func = ground_eval_func
-        image = self._render_precompiled(sdf_expression, ground_expression, material_setting, finite_difference_epsilon, convergence_threshold, num_iterations)
-    
-    def _render_precompiled(self, sdf_expression, ground_expression=None, 
-               material_setting=None, finite_difference_epsilon=None,
-               convergence_threshold=None, num_iterations=None):
+        image = self._render_precompiled(
+            sdf_expression,
+            ground_expression,
+            material_setting,
+            finite_difference_epsilon,
+            convergence_threshold,
+            num_iterations,
+        )
+
+    def _render_precompiled(
+        self,
+        sdf_expression,
+        ground_expression=None,
+        material_setting=None,
+        finite_difference_epsilon=None,
+        convergence_threshold=None,
+        num_iterations=None,
+    ):
 
         if convergence_threshold is None:
             convergence_threshold = self.convergence_threshold
@@ -217,22 +287,30 @@ class Renderer:
         if material_setting is None:
             material_setting = self.make_random_material()
 
-        image = render_expression(self.sdf_eval_func, self.ground_eval_func,
-                                  ray_positions, ray_directions,
-                                  camera_position, 
-                                  light_setting=self.light_setting,
-                                  material_setting=material_setting,
-                                  num_iterations=self.num_iterations,
-                                  convergence_threshold=self.convergence_threshold,
-                                  finite_difference_epsilon=finite_difference_epsilon)
+        image = render_expression(
+            self.sdf_eval_func,
+            self.ground_eval_func,
+            ray_positions,
+            ray_directions,
+            camera_position,
+            light_setting=self.light_setting,
+            material_setting=material_setting,
+            num_iterations=self.num_iterations,
+            convergence_threshold=self.convergence_threshold,
+            finite_difference_epsilon=finite_difference_epsilon,
+        )
         image = image.reshape(self.resolution[1], self.resolution[0], 3)
         if self.torch_compile:
             th._dynamo.reset()
         return image
 
     def make_random_material(self):
-        material_ambient_color = th.full((1, 1, 3), 0.2, device=self.device) + (th.rand(1, 1, 3, device=self.device) * 2 - 1) * 0.1
-        material_diffuse_color = th.full((1, 1, 3), 0.7, device=self.device) + (th.rand(1, 1, 3, device=self.device) * 2 - 1) * 0.1
+        material_ambient_color = (
+            th.full((1, 1, 3), 0.2, device=self.device) + (th.rand(1, 1, 3, device=self.device) * 2 - 1) * 0.1
+        )
+        material_diffuse_color = (
+            th.full((1, 1, 3), 0.7, device=self.device) + (th.rand(1, 1, 3, device=self.device) * 2 - 1) * 0.1
+        )
         material_specular_color = th.full((1, 1, 3), 0.1, device=self.device)
         material_emission_color = th.zeros(1, 1, 3, device=self.device)
         material_shininess = 64.0
@@ -252,9 +330,15 @@ class Renderer:
         return ground_expr
 
 
-def sphere_tracing(sdf_eval_func, ray_positions, ray_directions,
-                   num_iterations, convergence_threshold,
-                   foreground_masks=None, bounding_radius=None):
+def sphere_tracing(
+    sdf_eval_func,
+    ray_positions,
+    ray_directions,
+    num_iterations,
+    convergence_threshold,
+    foreground_masks=None,
+    bounding_radius=None,
+):
     # vanilla sphere tracing
     if foreground_masks is None:
         foreground_masks = th.all(th.isfinite(ray_positions), dim=-1, keepdim=True)
@@ -262,8 +346,8 @@ def sphere_tracing(sdf_eval_func, ray_positions, ray_directions,
     if bounding_radius:
         a = th.sum(ray_directions * ray_directions, dim=-1, keepdim=True)
         b = 2 * th.sum(ray_directions * ray_positions, dim=-1, keepdim=True)
-        c = th.sum(ray_positions * ray_positions, dim=-1, keepdim=True) - bounding_radius ** 2
-        d = b ** 2 - 4 * a * c
+        c = th.sum(ray_positions * ray_positions, dim=-1, keepdim=True) - bounding_radius**2
+        d = b**2 - 4 * a * c
         t = (-b - th.sqrt(d)) / (2 * a)
         bounded = d >= 0
         ray_positions = th.where(bounded, ray_positions + ray_directions * t, ray_positions)
@@ -275,9 +359,13 @@ def sphere_tracing(sdf_eval_func, ray_positions, ray_directions,
             # TODO: make this work for only the unconverged points.
             signed_distances = sdf_eval_func(ray_positions)
             if i:
-                ray_positions = th.where(foreground_masks & ~converged, ray_positions + ray_directions * signed_distances, ray_positions)
+                ray_positions = th.where(
+                    foreground_masks & ~converged, ray_positions + ray_directions * signed_distances, ray_positions
+                )
             else:
-                ray_positions = th.where(foreground_masks, ray_positions + ray_directions * signed_distances, ray_positions)
+                ray_positions = th.where(
+                    foreground_masks, ray_positions + ray_directions * signed_distances, ray_positions
+                )
             if bounding_radius:
                 bounded = th.norm(ray_positions, dim=-1, keepdim=True) < bounding_radius
                 foreground_masks = foreground_masks & bounded
@@ -288,9 +376,16 @@ def sphere_tracing(sdf_eval_func, ray_positions, ray_directions,
     return ray_positions, converged
 
 
-def compute_shadows(sdf_eval_func, surface_positions, surface_normals, light_directions,
-                    num_iterations, convergence_threshold,
-                    foreground_masks=None, bounding_radius=None):
+def compute_shadows(
+    sdf_eval_func,
+    surface_positions,
+    surface_normals,
+    light_directions,
+    num_iterations,
+    convergence_threshold,
+    foreground_masks=None,
+    bounding_radius=None,
+):
     surface_positions, converged = sphere_tracing(
         sdf_eval_func=sdf_eval_func,
         ray_positions=surface_positions + surface_normals * 1e-3,
@@ -298,7 +393,8 @@ def compute_shadows(sdf_eval_func, surface_positions, surface_normals, light_dir
         num_iterations=num_iterations,
         convergence_threshold=convergence_threshold,
         foreground_masks=foreground_masks,
-        bounding_radius=bounding_radius)
+        bounding_radius=bounding_radius,
+    )
     return converged
 
 
@@ -308,54 +404,83 @@ def compute_normal(sdf_eval_func, surface_positions, finite_difference_epsilon=N
         finite_difference_epsilon_x = surface_positions.new_tensor([finite_difference_epsilon, 0.0, 0.0])
         finite_difference_epsilon_y = surface_positions.new_tensor([0.0, finite_difference_epsilon, 0.0])
         finite_difference_epsilon_z = surface_positions.new_tensor([0.0, 0.0, finite_difference_epsilon])
-        surface_normals_x = sdf_eval_func(surface_positions + finite_difference_epsilon_x) - sdf_eval_func(surface_positions - finite_difference_epsilon_x)
-        surface_normals_y = sdf_eval_func(surface_positions + finite_difference_epsilon_y) - sdf_eval_func(surface_positions - finite_difference_epsilon_y)
-        surface_normals_z = sdf_eval_func(surface_positions + finite_difference_epsilon_z) - sdf_eval_func(surface_positions - finite_difference_epsilon_z)
+        surface_normals_x = sdf_eval_func(surface_positions + finite_difference_epsilon_x) - sdf_eval_func(
+            surface_positions - finite_difference_epsilon_x
+        )
+        surface_normals_y = sdf_eval_func(surface_positions + finite_difference_epsilon_y) - sdf_eval_func(
+            surface_positions - finite_difference_epsilon_y
+        )
+        surface_normals_z = sdf_eval_func(surface_positions + finite_difference_epsilon_z) - sdf_eval_func(
+            surface_positions - finite_difference_epsilon_z
+        )
         surface_normals = th.cat((surface_normals_x, surface_normals_y, surface_normals_z), dim=-1)
     else:
         create_graph = surface_positions.requires_grad
         surface_positions.requires_grad_(True)
         with th.enable_grad():
             signed_distances = sdf_eval_func(surface_positions)
-            surface_normals, = th.autograd.grad(
+            (surface_normals,) = th.autograd.grad(
                 outputs=signed_distances,
                 inputs=surface_positions,
                 grad_outputs=th.ones_like(signed_distances),
-                create_graph=create_graph)
+                create_graph=create_graph,
+            )
 
     surface_normals = nn.functional.normalize(surface_normals, dim=-1)
-    
+
     return surface_normals
 
 
-def phong_shading(surface_normals, view_directions,
-        light_directions, light_ambient_color, light_diffuse_color, light_specular_color,
-        material_ambient_color, material_diffuse_color, material_specular_color, material_emission_color, material_shininess):
+def phong_shading(
+    surface_normals,
+    view_directions,
+    light_directions,
+    light_ambient_color,
+    light_diffuse_color,
+    light_specular_color,
+    material_ambient_color,
+    material_diffuse_color,
+    material_specular_color,
+    material_emission_color,
+    material_shininess,
+):
     surface_normals = nn.functional.normalize(surface_normals, dim=-1)
     view_directions = nn.functional.normalize(view_directions, dim=-1)
     light_directions = nn.functional.normalize(light_directions, dim=-1)
 
-    reflected_directions = 2 * surface_normals * th.sum(light_directions * surface_normals, dim=-1, keepdim=True) - light_directions
+    reflected_directions = (
+        2 * surface_normals * th.sum(light_directions * surface_normals, dim=-1, keepdim=True) - light_directions
+    )
 
     diffuse_coefficients = nn.functional.relu(th.sum(light_directions * surface_normals, dim=-1, keepdim=True))
-    specular_coefficients = nn.functional.relu(th.sum(reflected_directions * view_directions, dim=-1, keepdim=True)) ** material_shininess
+    specular_coefficients = (
+        nn.functional.relu(th.sum(reflected_directions * view_directions, dim=-1, keepdim=True)) ** material_shininess
+    )
 
     images = th.clamp(
-        material_emission_color +
-        material_ambient_color * light_ambient_color +
-        material_diffuse_color * light_diffuse_color * diffuse_coefficients +
-        material_specular_color * light_specular_color * specular_coefficients,
-        0.0, 1.0)
+        material_emission_color
+        + material_ambient_color * light_ambient_color
+        + material_diffuse_color * light_diffuse_color * diffuse_coefficients
+        + material_specular_color * light_specular_color * specular_coefficients,
+        0.0,
+        1.0,
+    )
 
     return images
 
 
-def render_expression(sdf_eval_func, ground_eval_func,
-                      ray_positions, ray_directions,
-                      camera_position, light_setting,
-                      material_setting,
-                      num_iterations, convergence_threshold,
-                      finite_difference_epsilon=None):
+def render_expression(
+    sdf_eval_func,
+    ground_eval_func,
+    ray_positions,
+    ray_directions,
+    camera_position,
+    light_setting,
+    material_setting,
+    num_iterations,
+    convergence_threshold,
+    finite_difference_epsilon=None,
+):
     """
     Renders a 3D scene using the provided sdf evaluation functions and rendering settings.
 
@@ -388,15 +513,20 @@ def render_expression(sdf_eval_func, ground_eval_func,
     )
     surface_positions = th.where(converged, surface_positions, th.zeros_like(surface_positions))
 
-    surface_normals = compute_normal(sdf_eval_func=sdf_eval_func, 
-                                     surface_positions=surface_positions,
-                                     finite_difference_epsilon=finite_difference_epsilon)
+    surface_normals = compute_normal(
+        sdf_eval_func=sdf_eval_func,
+        surface_positions=surface_positions,
+        finite_difference_epsilon=finite_difference_epsilon,
+    )
 
     surface_normals = th.where(converged, surface_normals, th.zeros_like(surface_normals))
 
-    image = phong_shading(surface_normals=surface_normals,
-                          view_directions=camera_position - surface_positions,
-                          **light_setting, **material_setting)
+    image = phong_shading(
+        surface_normals=surface_normals,
+        view_directions=camera_position - surface_positions,
+        **light_setting,
+        **material_setting,
+    )
 
     grounded_val = ground_eval_func(surface_positions)
 
@@ -407,10 +537,11 @@ def render_expression(sdf_eval_func, ground_eval_func,
         sdf_eval_func=sdf_eval_func,
         surface_positions=surface_positions,
         surface_normals=surface_normals,
-        light_directions=light_setting['light_directions'],
+        light_directions=light_setting["light_directions"],
         num_iterations=num_iterations,
         convergence_threshold=convergence_threshold,
-        foreground_masks=converged)
+        foreground_masks=converged,
+    )
     image = th.where(shadowed, image * 0.5, image)
 
     image = th.where(converged, image, th.zeros_like(image))

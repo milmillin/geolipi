@@ -4,6 +4,7 @@ from .base import GLExpr, GLFunction
 from .primitives_higher import LinearExtrude3D, QuadraticBezierExtrude3D
 from .registry import register_symbol
 
+
 @register_symbol
 class Point3D(GLFunction):
     """
@@ -17,6 +18,7 @@ class PointRef(GLFunction):
     This function is used to create reference to parameterized attachment points.
     Used for GeoCODE primitives.
     """
+
     def __str__(self):
         args = self.args[1:]
         expr_hash = hash(args[0])

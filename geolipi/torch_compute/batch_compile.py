@@ -43,9 +43,7 @@ def expr_prim_count(expression: GLExpr):
     return prim_count_dict
 
 
-def compile_expr(
-    expression: GLExpr, sketcher: Sketcher = None
-):
+def compile_expr(expression: GLExpr, sketcher: Sketcher = None):
     """
     Compiles a GL expression into a format suitable for batch evaluation, gathering transformations,
     primitive parameters, and handling difference and complement operations.
@@ -84,16 +82,12 @@ def compile_expr(
             dtype=sketcher.dtype,
             device=sketcher.device,
         )
-        prim_inversions[prim_type] = th.zeros(
-            (prim_count), dtype=th.bool, device=sketcher.device
-        )
+        prim_inversions[prim_type] = th.zeros((prim_count), dtype=th.bool, device=sketcher.device)
         # Todo: Handle parameterized Primitives
         # Add type annotation to functions.
         n_params = 0  # len(inspect.signature(prim_type).parameters) # but each might not be singleton.
         if n_params > 0:
-            prim_params[prim_type] = th.zeros(
-                (prim_count, n_params), dtype=sketcher.dtype, device=sketcher.device
-            )
+            prim_params[prim_type] = th.zeros((prim_count, n_params), dtype=sketcher.dtype, device=sketcher.device)
 
     execution_stack = []
     execution_pointer_index = []
@@ -182,11 +176,7 @@ def compile_expr(
         else:
             raise ValueError(f"Unknown expression type {type(cur_expr)}")
 
-        while (
-            operator_stack
-            and len(execution_stack) - execution_pointer_index[-1]
-            >= operator_nargs_stack[-1]
-        ):
+        while operator_stack and len(execution_stack) - execution_pointer_index[-1] >= operator_nargs_stack[-1]:
             n_args = operator_nargs_stack.pop()
             operator = operator_stack.pop()
             _ = execution_pointer_index.pop()
@@ -268,10 +258,7 @@ def graph_to_expr(graph):
             parser_list.extend(next_to_parse)
             prim_stack_pointer.append(len(prim_stack))
 
-        while (
-            operator_stack
-            and len(prim_stack) - prim_stack_pointer[-1] >= operator_nargs_stack[-1]
-        ):
+        while operator_stack and len(prim_stack) - prim_stack_pointer[-1] >= operator_nargs_stack[-1]:
             n_args = operator_nargs_stack.pop()
             operator = operator_stack.pop()
             _ = prim_stack_pointer.pop()
@@ -501,7 +488,10 @@ def resolve_rule_cnf(graph, rule):
             graph.add_edge(node_a_id, new_id, None)
 
     return graph
+
+
 #############################################################################
+
 
 def create_compiled_expr(
     expression,
@@ -525,7 +515,8 @@ def create_compiled_expr(
     """
     expression = resolve_macros(expression, device=sketcher.device)
     compiled_expr = compile_expr(
-        expression, sketcher=sketcher,
+        expression,
+        sketcher=sketcher,
     )
     expr, transforms, inversions, params = compiled_expr
 

@@ -16,6 +16,7 @@ def get_affine_matrix_2D(matrix: th.Tensor, params: th.Tensor) -> th.Tensor:
     # matrix = matrix @ params
     return params
 
+
 def get_affine_translate_2D(matrix: th.Tensor, param: th.Tensor) -> th.Tensor:
     """
     Parameters:
@@ -83,11 +84,13 @@ def get_affine_rotate_2D(matrix: th.Tensor, param: th.Tensor) -> th.Tensor:
     matrix[1, 1] = c
     return matrix
 
+
 def get_affine_matrix_3D(matrix, param):
     """
     Applies a given affine transformation matrix.
     """
     return param
+
 
 def get_affine_translate_3D(matrix, param):
     """
@@ -141,6 +144,7 @@ def get_affine_reflection_3D(matrix, param):
     matrix[:3, :3] = reflection_matrix
     return matrix
 
+
 def get_affine_shear_3D(matrix, param):
     """
     Applies a 3D shear transformation to the given affine matrix.
@@ -176,6 +180,7 @@ def get_affine_shear_2D(matrix, param):
     matrix[:2, :2] = shear_matrix
     return matrix
 
+
 def get_affine_rotate_euler_3D(matrix, param):
     """
     Applies a 3D rotation to the given affine transformation matrix using Euler angles.
@@ -187,15 +192,11 @@ def get_affine_rotate_euler_3D(matrix, param):
     Returns:
         torch.Tensor: The modified affine transformation matrix.
     """
-    matrices = [
-        _axis_angle_rotation_3D(c, e) for c, e in zip(Settings.ROT_ORDER, th.unbind(param, -1))
-    ]
+    matrices = [_axis_angle_rotation_3D(c, e) for c, e in zip(Settings.ROT_ORDER, th.unbind(param, -1))]
     rotation_matrix = th.matmul(th.matmul(matrices[0], matrices[1]), matrices[2])
 
     matrix[:3, :3] = rotation_matrix
     return matrix
-
-
 
 
 # Source: https://github.com/facebookresearch/pytorch3d/blob/main/pytorch3d/transforms/rotation_conversions.py#L461
@@ -226,11 +227,7 @@ def axis_angle_to_rotation_matrix(axis_angle: th.Tensor) -> th.Tensor:
 
     x, y, z = axis.unbind(-1)  # each (...,)
     zero = th.zeros_like(x)
-    K = th.stack([
-        zero, -z,    y,
-         z,  zero,  -x,
-        -y,   x,   zero
-    ], dim=-1).reshape(axis.shape[:-1] + (3, 3))  # (..., 3, 3)
+    K = th.stack([zero, -z, y, z, zero, -x, -y, x, zero], dim=-1).reshape(axis.shape[:-1] + (3, 3))  # (..., 3, 3)
 
     I = th.eye(3, device=axis.device, dtype=axis.dtype).expand(K.shape)
     sin = th.sin(theta)[..., None]
@@ -239,7 +236,8 @@ def axis_angle_to_rotation_matrix(axis_angle: th.Tensor) -> th.Tensor:
     R = I + sin * K + (1 - cos) * (K @ K)  # Rodrigues' formula
 
     return R
-    
+
+
 def get_affine_rotate_axis_angle_3D(matrix, param):
     """
     Applies a 3D rotation to the given affine transformation matrix using axis-angle representation.
@@ -248,6 +246,7 @@ def get_affine_rotate_axis_angle_3D(matrix, param):
     matrix[:3, :3] = rotation_matrix
     return matrix
 
+
 def get_affine_rotate_matrix_3D(matrix, param):
     """
     Applies a 3D rotation to the given affine transformation matrix using a rotation matrix.
@@ -255,7 +254,7 @@ def get_affine_rotate_matrix_3D(matrix, param):
     matrix[:3, :3] = param
     return matrix
 
-    
+
 def position_distort(positions: th.Tensor, k: th.Tensor) -> th.Tensor:
     """
     Parameters:
@@ -281,9 +280,7 @@ def position_twist(positions: th.Tensor, k: th.Tensor) -> th.Tensor:
     c = th.cos(k * positions[..., 2])
     s = th.sin(k * positions[..., 2])
     rot = th.stack([c, -s, s, c], dim=-1).reshape(*c.shape, 2, 2)
-    q = th.cat(
-        [th.bmm(rot, positions[..., :2, None])[..., 0], positions[..., 2:]], dim=-1
-    )
+    q = th.cat([th.bmm(rot, positions[..., :2, None])[..., 0], positions[..., 2:]], dim=-1)
     return q
 
 
@@ -299,8 +296,5 @@ def position_cheap_bend(positions: th.Tensor, k: th.Tensor) -> th.Tensor:
     c = th.cos(k * positions[..., 0])
     s = th.sin(k * positions[..., 0])
     m = th.stack([c, -s, s, c], dim=-1).reshape(*c.shape, 2, 2)
-    q = th.cat(
-        [th.bmm(m, positions[..., :2, None])[..., 0], positions[..., 2:]], dim=-1
-    )
+    q = th.cat([th.bmm(m, positions[..., :2, None])[..., 0], positions[..., 2:]], dim=-1)
     return q
-

@@ -1,4 +1,5 @@
 """ Based on https://github.com/patrick-kidger/sptorch """
+
 import torch
 import sympy as sp
 import functools as ft
@@ -8,9 +9,9 @@ from typing import Dict, Union, Type, Callable, Any, TypeVar
 ExprType = TypeVar("ExprType", bound=sp.Expr)
 T = TypeVar("T")
 
+
 def _I(*args: Any) -> torch.Tensor:
     return torch.tensor(1j)
-
 
 
 def _reduce(fn: Callable[..., T]) -> Callable[..., T]:
@@ -19,9 +20,8 @@ def _reduce(fn: Callable[..., T]) -> Callable[..., T]:
 
     return fn_
 
-SYMPY_TO_TORCH: Dict[
-    Union[Type[sp.Basic], Callable[..., Any]], Callable[..., torch.Tensor]
-] = {
+
+SYMPY_TO_TORCH: Dict[Union[Type[sp.Basic], Callable[..., Any]], Callable[..., torch.Tensor]] = {
     sp.Mul: _reduce(torch.mul),
     sp.Add: _reduce(torch.add),
     sp.div: torch.div,
