@@ -35,13 +35,60 @@ Mainly, GeoLIPI attempts to embed a generic visual language in python, making it
 
 ## Installation
 
-Currently, there is no use actually "installing" the package. Just clone the repo and add it to your PYTHONPATH.
+### From PyPI (coming soon)
+
+Once published, you'll be able to install via pip:
+
+```bash
+# Basic installation with core dependencies
+pip install geolipi
+
+# Full installation with all optional features (plotly, rustworkx, scikit-fmm)
+pip install geolipi[full]
+
+# Development installation with docs and testing tools
+pip install geolipi[dev]
+```
+
+### From Source
+
+Clone the repository and install in development mode:
 
 ```bash
 git clone git@github.com:BardOfCodes/geolipi.git
-# Add path to your PYTHONPATH
-export PYTHONPATH=$PYTHONPATH:/path/to/geolipi
+cd geolipi
+
+# Basic installation
+pip install -e .
+
+# Or install with all optional dependencies
+pip install -e .[full]
+
+# Or install with development tools
+pip install -e .[dev]
 ```
+
+### Blender Integration
+
+The `geolipi.geometry_nodes` module requires Blender's Python API (`bpy`), which cannot be installed via pip. To use Blender integration:
+
+1. Install Blender from [blender.org](https://www.blender.org/)
+2. Use Blender's bundled Python or configure your environment to access `bpy`
+3. See `scripts/blender_render_example.py` for usage examples
+
+### Core Dependencies
+
+- Python >= 3.8
+- PyTorch >= 1.10.0
+- NumPy >= 1.20.0
+- SymPy >= 1.9
+- Matplotlib >= 3.3.0
+
+### Optional Dependencies
+
+- **Visualization**: plotly >= 5.0.0
+- **Advanced features**: rustworkx >= 0.12.0, scikit-fmm >= 2022.3.26
+- **Blender integration**: bpy (requires Blender installation)
 
 ## Examples
 

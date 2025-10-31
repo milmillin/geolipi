@@ -1,0 +1,94 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "geolipi"
+dynamic = ["version"]
+description = "A DSL for Implicit Geometric Modelling - Language for modelling 2D/3D geometric objects with multiple execution backends"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Aditya Ganeshan"}
+]
+maintainers = [
+    {name = "Aditya Ganeshan"}
+]
+keywords = [
+    "geometry",
+    "implicit-modeling",
+    "signed-distance-fields",
+    "sdf",
+    "procedural-generation",
+    "3d-modeling",
+    "dsl",
+    "computer-graphics"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+]
+requires-python = ">=3.8"
+
+# Core dependencies required for basic functionality
+dependencies = [
+    "torch>=1.10.0",
+    "numpy>=1.20.0",
+    "sympy>=1.9",
+    "matplotlib>=3.3.0",
+]
+
+[project.optional-dependencies]
+# Full installation with all optional features
+full = [
+    "plotly>=5.0.0",
+    "rustworkx>=0.12.0",
+    "scikit-fmm>=2022.3.26",
+]
+
+# Development dependencies
+dev = [
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=0.18.0",
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/BardOfCodes/geolipi"
+Documentation = "https://github.com/BardOfCodes/geolipi"
+Repository = "https://github.com/BardOfCodes/geolipi"
+"Bug Tracker" = "https://github.com/BardOfCodes/geolipi/issues"
+
+[tool.setuptools]
+packages = ["geolipi", "geolipi.symbolic", "geolipi.torch_compute", "geolipi.geometry_nodes"]
+include-package-data = true
+
+[tool.setuptools.dynamic]
+version = {attr = "geolipi.__version__"}
+
+[tool.setuptools.package-data]
+geolipi = ["torch_compute/xkcd_rgb.txt"]
+
+# Black configuration for code formatting
+[tool.black]
+line-length = 120
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+
+# isort configuration for import sorting
+[tool.isort]
+profile = "black"
+line_length = 120
